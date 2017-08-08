@@ -13,8 +13,8 @@ import javax.annotation.PostConstruct
 class AuthService {
 
     AmazonCognitoIdentityClient client
-    AuthDeviceDBService authDeviceService
-    AuthUserDBService authUserService
+    AuthDeviceDBService authDeviceDBService
+    AuthUserDBService authUserDBService
     GrailsApplication grailsApplication
 
     @PostConstruct
@@ -37,12 +37,12 @@ class AuthService {
      * @throws UnauthorizedException
      */
     public String getKey(String username, String uid) throws DataAccessException, UnauthorizedException {
-        AuthDevice device = authDeviceService.load(uid)
+        AuthDevice device = authDeviceDBService.load(uid)
         if (!device) {
             throw new UnauthorizedException("Couldn't find device: $uid")
         }
 
-        AuthUser user = authUserService.load(username)
+        AuthUser user = authUserDBService.load(username)
         if (!user) {
             throw new UnauthorizedException("Couldn't find user: $username")
         }
@@ -65,12 +65,12 @@ class AuthService {
                      Map<String,String> logins,
                      String identityId) {
 
-        AuthDevice device = authDeviceService.load(uid)
+        AuthDevice device = authDeviceDBService.load(uid)
         if (!device) {
             throw new UnauthorizedException("Couldn't find device: $uid")
         }
 
-        AuthUser user = authUserService.load(device.username)
+        AuthUser user = authUserDBService.load(device.username)
         if (!user) {
             throw new UnauthorizedException("Couldn't find user: $device.username")
         }
@@ -107,7 +107,7 @@ class AuthService {
     boolean registerUser(String username,
                          String password,
                          String endpoint) throws DataAccessException {
-        authUserService.register(username, password, endpoint)
+        authUserDBService.register(username, password, endpoint)
     }
 
     /**
@@ -138,7 +138,7 @@ class AuthService {
 
         // Validate signature
         log.debug "Validate signature: $signature"
-        AuthUser user = authUserService.load(username)
+        AuthUser user = authUserDBService.load(username)
         if (!user) {
             throw new UnauthorizedException("Couldn't find user: $username")
         }
@@ -205,7 +205,7 @@ class AuthService {
             throw new UnauthorizedException("Invalid timestamp: $timestamp")
         }
 
-        AuthDevice device = authDeviceService.load(uid)
+        AuthDevice device = authDeviceDBService.load(uid)
         if (!device) {
             throw new UnauthorizedException("Couldn't find device: $uid")
         }
@@ -265,8 +265,8 @@ class AuthService {
         log.debug "Generating encryption key"
         String encryptionKey = AuthUtilities.generateRandomString()
 
-        if (authDeviceService.register(uid, encryptionKey, username)) {
-            deviceInfo = authDeviceService.load(uid)
+        if (authDeviceDBService.register(uid, encryptionKey, username)) {
+            deviceInfo = authDeviceDBService.load(uid)
         }
         deviceInfo
     }

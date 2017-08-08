@@ -2,8 +2,18 @@ package benorama.auth
 
 import benorama.auth.exception.DataAccessException
 import com.amazonaws.AmazonClientException
+import org.springframework.beans.factory.InitializingBean
 
-class AuthUserDBService extends AbstractDBService {
+class AuthUserDBService extends AbstractDBService implements InitializingBean {
+
+    @Override
+    void afterPropertiesSet() throws Exception {
+        try {
+            createTable(AuthUser)
+        } catch(Exception e) {
+            log.warn("Error creating table for $AuthUser", e)
+        }
+    }
 
     /**
      * Authenticates the given username, password combination. Hash of password

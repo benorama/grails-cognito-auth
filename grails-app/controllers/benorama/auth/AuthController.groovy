@@ -9,8 +9,7 @@ class AuthController {
 
     def login() {
         if (!params.username || !params.timestamp || !params.signature || !params.uid) {
-            response.status = 400
-            respond([error: 'Missing required parameters'])
+            response.sendError(400, 'Missing required parameters')
             return
         }
 
@@ -21,26 +20,21 @@ class AuthController {
         String uid = params.uid
         log.debug "Login with username=$username, timestamp=$timestamp, uid=$uid, endpoint=$endpoint"
 
-        String key = ''
         try {
             authService.validateLoginRequest(username, uid, signature, timestamp)
-            key = authService.getKey(username, uid)
+            render authService.getKey(username, uid)
         } catch (DataAccessException e) {
             log.error "Failed to access data", e
-            response.status = 500
-            respond([error: 'Failed to access data'])
+            response.sendError(500, 'Failed to access data')
         } catch (UnauthorizedException e) {
-            log.warn "Unauthorized access due to: $e.message"
-            response.status = 401
-            respond([error: 'Unauthorized access'])
+            log.warn "Unauthorized access due to: $e.message", e
+            response.sendError(401, 'Unauthorized access')
         }
-        respond([key: key])
     }
 
     def token() {
         if (!params.timestamp || !params.signature || !params.uid) {
-            response.status = 400
-            respond([error: 'Missing required parameters'])
+            response.sendError(400, 'Missing required parameters')
             return
         }
 
@@ -75,24 +69,19 @@ class AuthController {
         }
         log.debug "Get token with uid=$uid and timestamp=$timestamp"
 
-        String token
         try {
             authService.validateTokenRequest(uid, signature, timestamp, stringToSign.toString())
-            token = authService.getToken(uid, logins, identityId)
+            render authService.getToken(uid, logins, identityId)
         } catch (DataAccessException e) {
             log.error "Failed to access data", e
-            response.status = 500
-            respond([error: 'Failed to access data'])
+            response.sendError(500, 'Failed to access data')
         } catch (UnauthorizedException e) {
             log.warn "Unauthorized access due to: $e.message"
-            response.status = 401
-            respond([error: 'Unauthorized access'])
+            response.sendError(401, 'Unauthorized access')
         } catch (Exception e) {
             log.error "Failed to access data", e
-            response.status = 500
-            respond([error: 'An error occurred'])
+            response.sendError(500, 'An error occurred')
         }
-        respond([token: token])
     }
 
 }

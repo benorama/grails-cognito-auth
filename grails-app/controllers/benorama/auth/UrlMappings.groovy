@@ -9,6 +9,9 @@ class UrlMappings {
             }
         }
 
+        "/login"(controller: "auth", action: "login")
+        "/gettoken"(controller: "auth", action: "token")
+
         "/"(controller: 'home')
         "500"(view:'/error')
         "404"(view:'/notFound')

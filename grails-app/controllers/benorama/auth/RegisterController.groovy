@@ -28,11 +28,12 @@ class RegisterController {
                 forward action: 'index', params: [error: 'Duplicate registration']
                 return
             }
+            forward action: 'success'
         } catch (DataAccessException e) {
+            log.error("Failed to register user", e)
             forward action: 'index', params: [error: 'Failed to register user']
             return
         }
-        forward action: 'success'
     }
 
     def failure() { }

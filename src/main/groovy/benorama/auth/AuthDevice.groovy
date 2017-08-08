@@ -6,7 +6,7 @@ import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTable
 import groovy.transform.Canonical
 
 @Canonical
-@DynamoDBTable(tableName="BenoramaAuthDevice")
+@DynamoDBTable(tableName="GrailsCognitoAuthDevice")
 class AuthDevice {
 
     @DynamoDBHashKey
