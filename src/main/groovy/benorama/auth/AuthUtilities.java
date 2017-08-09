@@ -18,6 +18,8 @@ package benorama.auth;
 import com.amazonaws.services.cognitoidentity.model.GetOpenIdTokenForDeveloperIdentityResult;
 import com.amazonaws.util.DateUtils;
 import org.apache.commons.codec.binary.Hex;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
@@ -27,6 +29,8 @@ import java.util.Date;
 
 public class AuthUtilities {
 
+    private static Logger log = LoggerFactory.getLogger(AuthUtilities.class);
+
     private static String ENCODING_FORMAT = "UTF8";
     private static String SIGNATURE_METHOD = "HmacSHA256";
     private static SecureRandom RANDOM = new SecureRandom();
@@ -34,78 +38,7 @@ public class AuthUtilities {
         RANDOM.generateSeed(16);
     }
 
-    public static String getEndPoint(HttpServletRequest request) {
-        if (null == request) {
-            return null;
-        }
-        else {
-            String endpoint = request.getServerName().toLowerCase();
-            return endpoint;
-        }
-    }
-
-    public static String generateRandomString() {
-        byte[] randomBytes = new byte[16];
-        RANDOM.nextBytes(randomBytes);
-        String randomString = new String(Hex.encodeHex(randomBytes));
-        return randomString;
-    }
-
-    public static String getSaltedPassword(String username, String appName, String endPointUri, String password) {
-        return sign((username + appName + endPointUri.toLowerCase()), password);
-    }
-
-    /**
-     * Checks to see if the request has valid timestamp. If given timestamp
-     * falls in 30 mins window from current server timestamp
-     */
-    public static boolean isTimestampValid(String timestamp) {
-        long timestampLong = 0L;
-        final long window = 15 * 60 * 1000L;
-
-        if (null == timestamp) {
-            return false;
-        }
-
-        timestampLong = DateUtils.parseISO8601Date(timestamp).getTime();
-        
-        Long now = new Date().getTime();
-
-        long before15Mins = new Date(now - window).getTime();
-        long after15Mins = new Date(now + window).getTime();
-
-        return (timestampLong >= before15Mins && timestampLong <= after15Mins);
-    }
-
-    public static boolean isValidUsername(String username) {
-        int length = username.length();
-        if (length < 3 || length > 128) {
-            return false;
-        }
-
-        char c = 0;
-        for (int i = 0; i < length; i++) {
-            c = username.charAt(i);
-            if (!Character.isLetterOrDigit(c) && '_' != c && '.' != c && '@' != c) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    public static boolean isValidPassword(String password) {
-        int length = password.length();
-        return (length >= 6 && length <= 128);
-    }
-
-    public static boolean isEmpty(String str) {
-        if (null == str || str.trim().length() == 0)
-            return true;
-        return false;
-    }
-
-    public static String prepareJsonResponseForTokens(String identityPoolId, GetOpenIdTokenForDeveloperIdentityResult result, String key) {
+    public static String prepareJsonResponseForTokens(GetOpenIdTokenForDeveloperIdentityResult result, String key, String identityPoolId) {
 
         StringBuilder responseBody = new StringBuilder();
         responseBody.append("{");
@@ -137,9 +70,71 @@ public class AuthUtilities {
             char[] signature = Hex.encodeHex(mac.doFinal(data));
             return new String(signature);
         } catch (Exception e) {
-            // Ignore
+            log.error("Exception during sign", e);
         }
         return null;
+    }
+
+
+    public static String getEndPoint(HttpServletRequest request) {
+        if (null == request) {
+            return null;
+        }
+        else {
+            String endpoint = request.getServerName().toLowerCase();
+            log.info("Endpoint : " + endpoint);
+            return endpoint;
+        }
+    }
+
+    /**
+     * Checks to see if the request has valid timestamp. If given timestamp
+     * falls in 30 mins window from current server timestamp
+     */
+    public static boolean isTimestampValid(String timestamp) {
+        long timestampLong = 0L;
+        final long window = 15 * 60 * 1000L;
+
+        if (null == timestamp) {
+            return false;
+        }
+
+        timestampLong = DateUtils.parseISO8601Date(timestamp).getTime();
+        
+        Long now = new Date().getTime();
+
+        long before15Mins = new Date(now - window).getTime();
+        long after15Mins = new Date(now + window).getTime();
+
+        return (timestampLong >= before15Mins && timestampLong <= after15Mins);
+    }
+
+    public static String generateRandomString() {
+        byte[] randomBytes = new byte[16];
+        RANDOM.nextBytes(randomBytes);
+        return new String(Hex.encodeHex(randomBytes));
+    }
+
+    public static boolean isValidUsername(String username) {
+        int length = username.length();
+        if (length < 3 || length > 128) {
+            return false;
+        }
+
+        char c = 0;
+        for (int i = 0; i < length; i++) {
+            c = username.charAt(i);
+            if (!Character.isLetterOrDigit(c) && '_' != c && '.' != c && '@' != c) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    public static boolean isValidPassword(String password) {
+        int length = password.length();
+        return (length >= 6 && length <= 128);
     }
 
     /**
@@ -160,26 +155,4 @@ public class AuthUtilities {
 
         return signaturesMatch;
     }
-
-    /**
-     * Extract element from a JSON string
-     * 
-     * @param json
-     *            A string of JSON blob
-     * @param element
-     *            JSON key
-     * @return the corresponding string value of the element
-     */
-    /*public static String extractElement(String json, String element) {
-        boolean hasElement = (json.indexOf(element) != -1);
-        if (hasElement) {
-            int elementIndex = json.indexOf(element) + element.length() + 1;
-            int startIndex = json.indexOf("\"", elementIndex);
-            int endIndex = json.indexOf("\"", startIndex + 1);
-
-            return json.substring(startIndex + 1, endIndex);
-        }
-
-        return null;
-    }*/
 }

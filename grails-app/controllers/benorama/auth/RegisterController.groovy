@@ -28,6 +28,7 @@ class RegisterController {
                 forward action: 'index', params: [error: 'Duplicate registration']
                 return
             }
+            log.info "Registered user: username=$params.username, endpoint=$endpoint"
             forward action: 'success'
         } catch (DataAccessException e) {
             log.error("Failed to register user", e)

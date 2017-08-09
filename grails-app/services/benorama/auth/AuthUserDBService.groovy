@@ -6,6 +6,8 @@ import org.springframework.beans.factory.InitializingBean
 
 class AuthUserDBService extends AbstractDBService implements InitializingBean {
 
+    AuthService authService
+
     @Override
     void afterPropertiesSet() throws Exception {
         try {
@@ -37,7 +39,7 @@ class AuthUserDBService extends AbstractDBService implements InitializingBean {
         if (!user) {
             return false
         }
-        String hashedSaltedPassword = AuthUtilities.getSaltedPassword(username, appName, uri, password)
+        String hashedSaltedPassword = authService.getSaltedPassword(password, username, uri)
         hashedSaltedPassword == user.hashedPassword
     }
 
@@ -83,7 +85,7 @@ class AuthUserDBService extends AbstractDBService implements InitializingBean {
             return
         }
 
-        String hashedSaltedPassword = AuthUtilities.getSaltedPassword(username, appName, uri, password)
+        String hashedSaltedPassword = authService.getSaltedPassword(password, username, uri)
         AuthUser user = new AuthUser(
                 hashedPassword: hashedSaltedPassword,
                 username: username

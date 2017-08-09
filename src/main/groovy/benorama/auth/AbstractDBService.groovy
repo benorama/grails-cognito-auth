@@ -50,12 +50,4 @@ abstract class AbstractDBService {
         }
     }
 
-    /**
-     *
-     * @return
-     */
-    protected static String getAppName() {
-        Metadata.current.'app.name'
-    }
-
 }

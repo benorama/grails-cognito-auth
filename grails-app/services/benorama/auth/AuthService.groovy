@@ -7,6 +7,7 @@ import com.amazonaws.services.cognitoidentity.AmazonCognitoIdentityClient
 import com.amazonaws.services.cognitoidentity.model.GetOpenIdTokenForDeveloperIdentityRequest
 import com.amazonaws.services.cognitoidentity.model.GetOpenIdTokenForDeveloperIdentityResult
 import grails.core.GrailsApplication
+import grails.util.Metadata
 
 import javax.annotation.PostConstruct
 
@@ -87,7 +88,7 @@ class AuthService {
         )
 
         log.debug "Generating session tokens for UID : $uid"
-        AuthUtilities.prepareJsonResponseForTokens(cognitoConfig.identityPoolId, result, device.key)
+        AuthUtilities.prepareJsonResponseForTokens(result, device.key, cognitoConfig.identityPoolId)
     }
 
     /**
@@ -228,7 +229,6 @@ class AuthService {
         if (!cognitoConfig.identityPoolId || !username) {
             return null
         }
-        GetOpenIdTokenForDeveloperIdentityResult result
         try {
             GetOpenIdTokenForDeveloperIdentityRequest tokenGetRequest = new GetOpenIdTokenForDeveloperIdentityRequest()
                 .withIdentityPoolId(cognitoConfig.identityPoolId)
@@ -238,13 +238,13 @@ class AuthService {
                 tokenGetRequest.identityId = identityId
             }
             log.debug "Requesting identity Id: $identityId"
-            result = client.getOpenIdTokenForDeveloperIdentity(tokenGetRequest)
+            GetOpenIdTokenForDeveloperIdentityResult  result = client.getOpenIdTokenForDeveloperIdentity(tokenGetRequest)
             log.debug "Response identity Id: $result.identityId"
+            return result
         } catch (Exception exception) {
             log.error "Exception during getTemporaryCredentials", exception
             throw exception
         }
-        result
     }
 
     /**
@@ -271,4 +271,13 @@ class AuthService {
         deviceInfo
     }
 
+    String getSaltedPassword(String password, String username, String endpoint) {
+        String salt = cognitoConfig.salt ?: (username + appName + endpoint.toLowerCase())
+        return AuthUtilities.sign(salt, password);
+    }
+
+
+    protected static String getAppName() {
+        Metadata.current.'app.name'
+    }
 }
