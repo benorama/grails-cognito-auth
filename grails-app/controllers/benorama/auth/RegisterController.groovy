@@ -1,10 +1,12 @@
 package benorama.auth
 
-import benorama.auth.exception.DataAccessException
+import grails.plugin.awssdk.cognito.AuthUtilities
+import grails.plugin.awssdk.cognito.exception.DataAccessException
+
 
 class RegisterController {
 
-    AuthService authService
+    AuthUserDBService authUserDBService
 
     def create() {
         if (!params.username || !params.password) {
@@ -19,7 +21,7 @@ class RegisterController {
         String endpoint = AuthUtilities.getEndPoint(request)
         log.info "Registering user: username=$params.username, endpoint=$endpoint"
         try {
-            boolean result = authService.registerUser(
+            boolean result = authUserDBService.register(
                     params.username,
                     params.password,
                     endpoint
