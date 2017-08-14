@@ -232,7 +232,7 @@ class AuthService {
         try {
             GetOpenIdTokenForDeveloperIdentityRequest tokenGetRequest = new GetOpenIdTokenForDeveloperIdentityRequest()
                 .withIdentityPoolId(cognitoConfig.identityPoolId)
-                .withTokenDuration(cognitoConfig.sessionDuration?.toLong() ?: 900)
+                .withTokenDuration((cognitoConfig.sessionDuration ?: '900')?.toLong())
                 .withLogins(logins)
             if (identityId){
                 tokenGetRequest.identityId = identityId

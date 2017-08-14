@@ -9,7 +9,7 @@ buildscript {
     }
 }
 
-version "0.1.7"
+version "0.1.8"
 group "benorama.auth"
 
 apply plugin:"eclipse"
