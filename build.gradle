@@ -9,7 +9,7 @@ buildscript {
     }
 }
 
-version "0.1.8"
+version "0.1.10"
 group "benorama.auth"
 
 apply plugin:"eclipse"
@@ -21,6 +21,7 @@ apply plugin:"asset-pipeline"
 
 repositories {
     mavenLocal()
+    maven { url 'http://dl.bintray.com/agorapulse/libs' }
     maven { url "https://repo.grails.org/grails/core" }
 }
 
@@ -44,6 +45,8 @@ dependencies {
 
     compile "com.amazonaws:aws-java-sdk-cognitoidentity:1.11.52"
     compile "com.amazonaws:aws-java-sdk-dynamodb:1.11.52"
+
+    compile 'org.grails.plugins:aws-sdk-cognito:2.1.18'
 
     runtime 'org.grails.plugins:grails-console:2.0.9'
 }

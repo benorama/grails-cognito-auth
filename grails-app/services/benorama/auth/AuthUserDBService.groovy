@@ -1,7 +1,7 @@
 package benorama.auth
 
-import benorama.auth.exception.DataAccessException
 import com.amazonaws.AmazonClientException
+import grails.plugin.awssdk.cognito.exception.DataAccessException
 import org.springframework.beans.factory.InitializingBean
 
 class AuthUserDBService extends AbstractDBService implements InitializingBean {
