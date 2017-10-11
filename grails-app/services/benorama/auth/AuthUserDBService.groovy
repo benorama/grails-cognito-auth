@@ -1,6 +1,7 @@
 package benorama.auth
 
 import com.amazonaws.AmazonClientException
+import grails.plugin.awssdk.cognito.AuthUtilities
 import grails.plugin.awssdk.cognito.exception.DataAccessException
 import org.springframework.beans.factory.InitializingBean
 
@@ -143,12 +144,14 @@ class AuthUserDBService extends AbstractDBService implements InitializingBean {
     boolean register(String username,
                      String password,
                      String uri) throws DataAccessException {
-        AuthUser user = load(username)
-        if (user) {
+        try {
+            load(username)
             return false
+        } catch (DataAccessException ignored) {
+            store(username, password, uri)
+            return true
         }
-        store(username, password, uri)
-        true
+
     }
 
 }
