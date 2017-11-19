@@ -43,9 +43,9 @@ dependencies {
     testRuntime "org.seleniumhq.selenium:selenium-htmlunit-driver:2.47.1"
     testRuntime "net.sourceforge.htmlunit:htmlunit:2.18"
 
-    compile "com.amazonaws:aws-java-sdk-dynamodb:1.11.52"
+    compile "com.amazonaws:aws-java-sdk-dynamodb:1.11.230"
 
-    compile 'org.grails.plugins:aws-sdk-cognito:2.1.18'
+    compile 'org.grails.plugins:aws-sdk-cognito:2.1.19'
 
     runtime 'org.grails.plugins:grails-console:2.0.9'
 }

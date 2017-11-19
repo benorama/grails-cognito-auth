@@ -2,19 +2,8 @@ package benorama.auth
 
 import com.amazonaws.AmazonClientException
 import grails.plugin.awssdk.cognito.exception.DataAccessException
-import org.springframework.beans.factory.InitializingBean
 
-class AuthDeviceDBService extends AbstractDBService implements InitializingBean {
-
-
-    @Override
-    void afterPropertiesSet() throws Exception {
-        try {
-            createTable(AuthDevice)
-        } catch(Exception e) {
-            log.warn("Error creating table for $AuthDevice", e)
-        }
-    }
+class AuthDeviceDBService extends AbstractDBService {
 
     /**
      * Authenticates the given UID, Key combination. If the password in the item

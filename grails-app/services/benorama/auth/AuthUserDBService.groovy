@@ -3,20 +3,10 @@ package benorama.auth
 import com.amazonaws.AmazonClientException
 import grails.plugin.awssdk.cognito.AuthUtilities
 import grails.plugin.awssdk.cognito.exception.DataAccessException
-import org.springframework.beans.factory.InitializingBean
 
-class AuthUserDBService extends AbstractDBService implements InitializingBean {
+class AuthUserDBService extends AbstractDBService {
 
     AuthService authService
-
-    @Override
-    void afterPropertiesSet() throws Exception {
-        try {
-            createTable(AuthUser)
-        } catch(Exception e) {
-            log.warn("Error creating table for $AuthUser", e)
-        }
-    }
 
     /**
      * Authenticates the given username, password combination. Hash of password
@@ -144,14 +134,19 @@ class AuthUserDBService extends AbstractDBService implements InitializingBean {
     boolean register(String username,
                      String password,
                      String uri) throws DataAccessException {
-        try {
+        def user = load(username)
+        if (user) {
+            return false
+        }
+        store(username, password, uri)
+        return true
+        /*try {
             load(username)
             return false
         } catch (DataAccessException ignored) {
             store(username, password, uri)
             return true
-        }
-
+        }*/
     }
 
 }

@@ -1,23 +1,42 @@
 package benorama.auth
 
-import com.amazonaws.auth.DefaultAWSCredentialsProviderChain
-import com.amazonaws.regions.RegionUtils
+import agorapulse.libs.awssdk.util.AwsClientUtil
+import com.amazonaws.ClientConfiguration
+import com.amazonaws.auth.AWSStaticCredentialsProvider
+import com.amazonaws.auth.BasicAWSCredentials
+import com.amazonaws.regions.Region
+import com.amazonaws.services.dynamodbv2.AmazonDynamoDB
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient
+import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTable
 import com.amazonaws.services.dynamodbv2.model.CreateTableRequest
 import com.amazonaws.services.dynamodbv2.model.ProvisionedThroughput
 import com.amazonaws.services.dynamodbv2.model.ResourceNotFoundException
-import grails.util.Metadata
+import grails.core.GrailsApplication
+import org.springframework.beans.factory.InitializingBean
 
-abstract class AbstractDBService {
+abstract class AbstractDBService implements InitializingBean {
 
-    protected AmazonDynamoDBClient client
-    protected DynamoDBMapper mapper
+    static SERVICE_NAME = AmazonDynamoDB.ENDPOINT_PREFIX
 
-    AbstractDBService() {
-        client = new AmazonDynamoDBClient(new DefaultAWSCredentialsProviderChain())
-        //client.setRegion(RegionUtils.getRegion('us-west-2'))
+    GrailsApplication grailsApplication
+    AmazonDynamoDBClient client
+    DynamoDBMapper mapper
+
+    void afterPropertiesSet() throws Exception {
+        // Set region
+        Region region = AwsClientUtil.buildRegion(config, serviceConfig)
+        assert region?.isServiceSupported(SERVICE_NAME)
+
+        // Create client
+        def credentials = AwsClientUtil.buildCredentials(config, serviceConfig)
+        ClientConfiguration configuration = AwsClientUtil.buildClientConfiguration(config, serviceConfig)
+        client = AmazonDynamoDBClientBuilder.standard()
+                .withRegion(region)
+                .withCredentials(credentials)
+                .withClientConfiguration(configuration)
+                .build()
         mapper = new DynamoDBMapper(client)
     }
 
@@ -48,6 +67,16 @@ abstract class AbstractDBService {
 
             client.createTable(createTableRequest)
         }
+    }
+
+    // PRIVATE
+
+    def getConfig() {
+        grailsApplication.config.grails?.plugin?.awssdk ?: grailsApplication.config.grails?.plugins?.awssdk
+    }
+
+    def getServiceConfig() {
+        config[SERVICE_NAME]
     }
 
 }

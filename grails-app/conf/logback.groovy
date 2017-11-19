@@ -32,5 +32,12 @@ if (Environment.isDevelopmentMode() && targetDir != null) {
         }
     }
     logger("StackTrace", WARN, ['FULL_STACKTRACE'], false)
+
+    logger 'benorama', DEBUG, ['STDOUT'], false
+    logger 'grails.app.controllers', DEBUG, ['STDOUT'], false
+    logger 'grails.app.jobs', DEBUG, ['STDOUT'], false
+    logger 'grails.app.services', DEBUG, ['STDOUT'], false
+    logger 'grails.artefact.Interceptor', DEBUG, ['STDOUT'], false
+    logger 'grails.plugin.awssdk', DEBUG, ['STDOUT'], false
 }
 root(WARN, ['STDOUT'])
